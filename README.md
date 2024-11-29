@@ -1,7 +1,7 @@
 # flowchart
 
 
-```
+```mermaid
 flowchart LR
     A[Landing Page] --> B[Generate Global ULID]
     B --> C[Send Visitor Data to Databases]
