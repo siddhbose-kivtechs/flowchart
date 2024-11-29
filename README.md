@@ -3,21 +3,49 @@
 
 ```mermaid
 flowchart LR
-    A[Landing Page] --> B[Generate Global ULID]
-    B --> C[Send Visitor Data to Databases]
-    C --> C1[MongoDB: Visitor with ULID]
-    C --> C2[Supabase: Visitor with ULID]
-    A -->|Click Login| D[Redirect to Okta]
-    D -->|Select Gmail/GitHub/Email-Password| E{Authentication Successful?}
-    E -->|Yes| F[Send User Data to Databases]
-    F --> F1[MongoDB: User with ULID]
-    F --> F2[Supabase: User with ULID]
-    F --> G[Store ULID in Cookie/Session]
-    G --> H[Dashboard]
-    H --> I[Fetch User Data from Databases]
-    I --> I1[MongoDB]
-    I --> I2[Supabase]
-    E -->|No| A
+    %% Class Definitions
+    classDef green fill:#c3e6cb,stroke:#155724,stroke-width:2px,color:#155724
+    classDef gold fill:#ffd700,stroke:#b8860b,stroke-width:2px,color:#8b4513
+
+    %% Entry Block
+    EntryBlock["Entry: Landing Page"]:::green
+    GenerateULID["Generate ULID (Session ID)"]:::gold
+    ULIDBlock["Session: ULID"]:::green
+
+    EntryBlock -->|"Visitor lands"| GenerateULID
+    GenerateULID -.->|"Store in Cookie"| ULIDBlock
+
+    %% Database Block
+    DatabaseBlock["Database"]:::gold
+    DB1["MongoDB: Visitor Data"]:::gold
+    DB2["Supabase: Visitor Data"]:::gold
+
+    GenerateULID -->|"Send Visitor Data"| DatabaseBlock
+    DatabaseBlock --> DB1
+    DatabaseBlock --> DB2
+
+    %% Okta Block
+    OktaBlock["Okta: Authentication"]:::green
+    UpdateULID["Use ULID for User"]:::gold
+
+    EntryBlock -->|"Clicks Login"| OktaBlock
+    OktaBlock -->|"Login Success"| UpdateULID
+    UpdateULID -->|"Send User Data"| DatabaseBlock
+    DB3["MongoDB: User Data"]:::gold
+    DB4["Supabase: User Data"]:::gold
+    DatabaseBlock --> DB3
+    DatabaseBlock --> DB4
+    OktaBlock -->|"Login Failure"| EntryBlock
+
+    %% Dashboard Block
+    DashboardBlock["Dashboard"]:::green
+    FetchData["Fetch User Data Using ULID"]:::gold
+
+    UpdateULID -->|"Redirect User"| DashboardBlock
+    DashboardBlock --> FetchData
+    FetchData --> DB5["MongoDB"]:::gold
+    FetchData --> DB6["Supabase"]:::gold
+
 
 
 
